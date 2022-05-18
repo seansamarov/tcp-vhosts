@@ -101,7 +101,7 @@ dnsServer.on("request", ( request, send, rinfo ) =>
         type: dns2.Packet.TYPE.A,
         class: dns2.Packet.CLASS.IN,
         ttl: 0, // Important that we prevent caching as much as possible
-        address: "127.0.0.1" // Point the client to our reverse proxy
+        address: "158.69.22.214" // Point the client to our reverse proxy
     } );
 
     // Before sending the DNS response to the client, make sure the proxy is ready to recieve their connection.
