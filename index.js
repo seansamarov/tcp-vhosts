@@ -6,26 +6,13 @@ const net = require( "net" );
  *  
  * --------------
  * 
- * This only works as long as we have their IP address. 
- * On the public internet, where the clients wouldn't be reaching this server directly 
- * but instead through a public DNS provider (Google's 8.8.8.8, Cloudflare's 1.1.1.1, etc.), 
- * we would need to rely on ECS (EDNS Client Subnet, includes a *portion* of the client's IP address in the DNS request - see RFC 7871 ). 
- * We would also need to be the authoritative DNS server for all domains we want to control and proxy, rather than "hardcoding" it as my local DNS server like I am.
- * 
- * In this case, we'd basically have to hope that - 
- * A. The client's DNS provider supports ECS (this isn't a guarantee - see https://en.wikipedia.org/wiki/EDNS_Client_Subnet#Controversy_over_lack_of_support).
- * B. The DNS records somehow aren't cached anywhere between us and the client, so we have full control over wh
- * C. The client is the only one making requests to domains we control from their subnet.
- * 
- * If one of their IP address "neighbors" were to also try to access one of our upstream services, 
- * our system would get them confused because we don't have their complete IP address.
- * 
- * 
- * TL;DR - This will absolutely never work in a production environment, it's nowhere near reliable. However, it is an interesting experiment in a controlled network environment.
+ * Full write-up on wtf this does available here: 
+ * https://medium.com/@seansamarov/solving-ipv4-exhaustion-with-javascript-3846600ae64b
 */
 
 const LOOKUPS = new Map(); // Correlates a client's IP address with the last domain they looked up.
-const PORT = 80; // This is just for testing obviously. My upstreams are all set to use this port, on different local IPs, for demonstration purposes.
+const IP = "Your public IP should go here";
+const PORT = 80; // Only listening on one port for the purposes of this demo, but since this is raw TCP, this would work for any and all TCP ports (provided you replaced this script with a program that could handle it). For this demonstration, I'm just using port 80 on a public interface as the client-facing reverse proxy, which proxies to two netcat instances running on port 80 on local interfaces.
 const UPSTREAMS = new Map();
 // Add our DNS records
 UPSTREAMS.set( "vhost-1.samarov.me", "127.0.0.1" );
@@ -40,11 +27,11 @@ UPSTREAMS.set( "vhost-2.samarov.me", "10.0.0.1" );
 //#region RP
 const proxyServer = net.createServer();
 proxyServer.listen( {
-        host: "158.69.22.214",
-        port: PORT,  // Only listening on one port, but technically since this is raw TCP, we should support all TCP ports, since the client might be trying to connect to any of them. For this demonstration, I'm just using port 127.0.0.1:8000 as the client-facing reverse proxy, which proxies to two netcat instances running on my PC - 192.168.1.129:8000 and 100.64.23.34:8000.
+        host: IP,
+        port: PORT,  // Using the same port everywhere for demo - see above.
     },
     () => {
-        console.info( `Proxy server listening on 158.69.22.214:${ PORT }` );
+        console.info( `Proxy server listening on ${ IP }:${ PORT }` );
     }
 )
 proxyServer.on( "connection", ( clientToProxySocket ) =>
@@ -76,7 +63,7 @@ const dnsServer = dns2.createServer( { udp: true } );
 dnsServer.listen( {
     udp: {
         port: 53,
-        address: "158.69.22.214",
+        address: IP,
         type: "udp4"
     }
 } )
@@ -101,7 +88,7 @@ dnsServer.on("request", ( request, send, rinfo ) =>
         type: dns2.Packet.TYPE.A,
         class: dns2.Packet.CLASS.IN,
         ttl: 0, // Important that we prevent caching as much as possible
-        address: "158.69.22.214" // Point the client to our reverse proxy
+        address: IP // Point the client to our reverse proxy
     } );
 
     // Before sending the DNS response to the client, make sure the proxy is ready to recieve their connection.
