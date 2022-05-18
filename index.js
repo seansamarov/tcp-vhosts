@@ -53,7 +53,7 @@ proxyServer.on( "connection", ( clientToProxySocket ) =>
     const DOMAIN_NAME = LOOKUPS.get( CLIENT_IP ); // Find the last domain they looked up with us
     const UPSTREAM_IP = UPSTREAMS.get( DOMAIN_NAME ); // Send them to the right upstream for that domain
 
-    console.info( `Client ${ CLIENT_IP } connected to proxy.` );
+    console.info( `Client ${ CLIENT_IP } connected to proxy. Connecting them to ${DOMAIN_NAME}.` );
 
     clientToProxySocket.once( "data", ( data ) =>
     {
