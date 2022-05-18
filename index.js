@@ -28,8 +28,8 @@ const LOOKUPS = new Map(); // Correlates a client's IP address with the last dom
 const PORT = 80; // This is just for testing obviously. My upstreams are all set to use this port, on different local IPs, for demonstration purposes.
 const UPSTREAMS = new Map();
 // Add our DNS records
-UPSTREAMS.set( "vhost-1.samarov.me", "158.69.22.214" );
-UPSTREAMS.set( "vhost-2.samarov.me", "158.69.22.214" );
+UPSTREAMS.set( "vhost-1.samarov.me", "127.0.0.1" );
+UPSTREAMS.set( "vhost-2.samarov.me", "10.0.0.1" );
 
 
 /**
