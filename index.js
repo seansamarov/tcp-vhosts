@@ -25,11 +25,11 @@ const net = require( "net" );
 */
 
 const LOOKUPS = new Map(); // Correlates a client's IP address with the last domain they looked up.
-const PORT = 8000; // This is just for testing obviously. My upstreams are all set to use this port, on different local IPs, for demonstration purposes.
+const PORT = 80; // This is just for testing obviously. My upstreams are all set to use this port, on different local IPs, for demonstration purposes.
 const UPSTREAMS = new Map();
 // Add our DNS records
-UPSTREAMS.set( "google.com", "192.168.1.129" );
-UPSTREAMS.set( "youtube.com", "100.64.23.34" );
+UPSTREAMS.set( "vhost-1.samarov.me", "158.69.22.214" );
+UPSTREAMS.set( "vhost-2.samarov.me", "158.69.22.214" );
 
 
 /**
@@ -40,11 +40,11 @@ UPSTREAMS.set( "youtube.com", "100.64.23.34" );
 //#region RP
 const proxyServer = net.createServer();
 proxyServer.listen( {
-        host: "127.0.0.1",
+        host: "158.69.22.214",
         port: PORT,  // Only listening on one port, but technically since this is raw TCP, we should support all TCP ports, since the client might be trying to connect to any of them. For this demonstration, I'm just using port 127.0.0.1:8000 as the client-facing reverse proxy, which proxies to two netcat instances running on my PC - 192.168.1.129:8000 and 100.64.23.34:8000.
     },
     () => {
-        console.info( `Proxy server listening on 127.0.0.1:${ PORT }` );
+        console.info( `Proxy server listening on 158.69.22.214:${ PORT }` );
     }
 )
 proxyServer.on( "connection", ( clientToProxySocket ) =>
@@ -75,8 +75,8 @@ proxyServer.on( "connection", ( clientToProxySocket ) =>
 const dnsServer = dns2.createServer( { udp: true } );
 dnsServer.listen( {
     udp: {
-        port: 5333,
-        address: "127.0.0.1",
+        port: 53,
+        address: "158.69.22.214",
         type: "udp4"
     }
 } )
@@ -92,6 +92,9 @@ dnsServer.on("request", ( request, send, rinfo ) =>
      * so that the reverse proxy can find the last domain they looked 
      * up by their IP adress and proxy them to the right backend. 
      */
+
+    console.log("Request Debug:", request, rinfo );
+
     console.info( `Client ${ CLIENT_IP } just looked up ${ DOMAIN_NAME }. Storing.` );
 
     const response = dns2.Packet.createResponseFromRequest( request );

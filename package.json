@@ -1,7 +1,7 @@
 {
   "name": "tcpvhosts",
   "version": "1.0.0",
-  "description": "Virtual Hosting over TCP via Correlated DNS Lookups",
+  "description": "Virtual Hosting over TCP via Client IP-Correlated DNS Lookups",
   "main": "index.js",
   "author": "Sean Samarov",
   "license": "MIT",
