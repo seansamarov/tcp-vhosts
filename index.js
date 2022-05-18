@@ -92,9 +92,7 @@ dnsServer.on("request", ( request, send, rinfo ) =>
      * so that the reverse proxy can find the last domain they looked 
      * up by their IP adress and proxy them to the right backend. 
      */
-
-    console.log("Request Debug:", request, rinfo );
-
+    
     console.info( `Client ${ CLIENT_IP } just looked up ${ DOMAIN_NAME }. Storing.` );
 
     const response = dns2.Packet.createResponseFromRequest( request );
