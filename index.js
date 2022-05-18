@@ -1,7 +1,7 @@
 const dns2 = require( "dns2" );
 const net = require( "net" );
 /**
- * Virtual Hosting over TCP via Client IP Address-Correlated DNS Lookups
+ * Universal TCP SNI/Virtual Hosting via Client-IP-Address-Correlated DNS Queries
  * or Solving IPv4 Exhaustion with JavaScript
  *  
  * --------------
