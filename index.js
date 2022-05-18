@@ -10,11 +10,17 @@ const net = require( "net" );
  * https://medium.com/@seansamarov/solving-ipv4-exhaustion-with-javascript-3846600ae64b
 */
 
-const LOOKUPS = new Map(); // Correlates a client's IP address with the last domain they looked up.
+const LOOKUPS = new Map(); // Correlates a client's IP address with the last domain they looked up. If you were to deploy this into production, you'd probably use Redis or something, and would need persistence.
 const IP = "Your public IP should go here";
-const PORT = 80; // Only listening on one port for the purposes of this demo, but since this is raw TCP, this would work for any and all TCP ports (provided you replaced this script with a program that could handle it). For this demonstration, I'm just using port 80 on a public interface as the client-facing reverse proxy, which proxies to two netcat instances running on port 80 on local interfaces.
+const PORT = 80;
+/**
+ * Only listening on one port for the purposes of this demo, but since this is raw TCP, 
+ * this would work for any and all TCP ports (provided you replaced this script with a program that could handle it). 
+ * For this demonstration, I'm just using port 80 on a public interface as the client-facing reverse proxy, 
+ * which proxies to two netcat instances running on port 80 on local interfaces.
+ */ 
 const UPSTREAMS = new Map();
-// Add our DNS records
+// Add our DNS "records" (which upstream to proxy to for each domain)
 UPSTREAMS.set( "vhost-1.samarov.me", "127.0.0.1" );
 UPSTREAMS.set( "vhost-2.samarov.me", "10.0.0.1" );
 
@@ -62,7 +68,7 @@ proxyServer.on( "connection", ( clientToProxySocket ) =>
 const dnsServer = dns2.createServer( { udp: true } );
 dnsServer.listen( {
     udp: {
-        port: 53,
+        port: 53, // Requires running this script as root (always an excellent idea with Node apps btw)
         address: IP,
         type: "udp4"
     }
